@@ -5,6 +5,7 @@ program: statement+ ;
 
 // 语句由很多种
 statement : varStatement
+        | assignStatement
         | returnStatement
         | blockStatement
         | ifStatement
@@ -15,10 +16,11 @@ statement : varStatement
         ;
 
 varStatement: 'var' IDENTIFIER '=' expression ';' ;
+assignStatement: IDENTIFIER '=' expression ';' ;
 returnStatement: 'return' expression ';' ;
 blockStatement: '{' statement* '}' ;
 ifStatement: 'if' '(' cond=expression ')' ifBody = blockStatement ('else' elseBody=blockStatement)? ;
-forStatement: 'for' '(' init=statement cond=statement step=expression ')' body=blockStatement;
+forStatement: 'for' '(' init=statement cond=statement step=statement ')' body=blockStatement;
 breakStatement: 'break' ';';
 continueStatement: 'continue' ';';
 expresstionStatement: expression ';' ;
@@ -45,10 +47,11 @@ unary
 params: (IDENTIFIER (',' IDENTIFIER)*)?;
 arguments: (expression (',' expression)* ','?)?;
 
-FUNCTION: 'function';
+FUNCTION: 'func';
 PLUS: '+';
 MINUS: '-';
 EQ: '==';
+ASSIGN:'=';
 MULTIPLY: '*';
 DIVIDE: '/';
 NEQ: '!=';

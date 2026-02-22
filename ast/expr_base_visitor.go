@@ -19,6 +19,10 @@ func (v *BaseExprVisitor) VisitVarStatement(ctx *VarStatementContext) interface{
 	return v.VisitChildren(ctx)
 }
 
+func (v *BaseExprVisitor) VisitAssignStatement(ctx *AssignStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
 func (v *BaseExprVisitor) VisitReturnStatement(ctx *ReturnStatementContext) interface{} {
 	return v.VisitChildren(ctx)
 }

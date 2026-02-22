@@ -16,6 +16,9 @@ type ExprVisitor interface {
 	// Visit a parse tree produced by ExprParser#varStatement.
 	VisitVarStatement(ctx *VarStatementContext) interface{}
 
+	// Visit a parse tree produced by ExprParser#assignStatement.
+	VisitAssignStatement(ctx *AssignStatementContext) interface{}
+
 	// Visit a parse tree produced by ExprParser#returnStatement.
 	VisitReturnStatement(ctx *ReturnStatementContext) interface{}
 
