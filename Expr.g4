@@ -3,7 +3,7 @@ grammar Expr;
 // 程序由多个语句组成
 program: statement+ ;
 
-// 语句由很多种
+// 语句有很多种
 statement : varStatement
         | assignStatement
         | returnStatement
@@ -15,6 +15,7 @@ statement : varStatement
         | expresstionStatement
         ;
 
+// 各种语句
 varStatement: 'var' IDENTIFIER '=' expression ';' ;
 assignStatement: IDENTIFIER '=' expression ';' ;
 returnStatement: 'return' expression ';' ;
@@ -25,6 +26,7 @@ breakStatement: 'break' ';';
 continueStatement: 'continue' ';';
 expresstionStatement: expression ';' ;
 
+// 表达式解析
 expression : additionExpression    # AddInEq
             | left=expression op=(EQ|NEQ) right=additionExpression # Eq
             ;

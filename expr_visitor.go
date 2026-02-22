@@ -64,9 +64,9 @@ func (v *ExprVisitor) toBool(val interface{}) bool {
 
 func (v *ExprVisitor) VisitProgram(ctx *ast.ProgramContext) interface{} {
 	statements := ctx.AllStatement()
-	for _, stmt := range statements {
+	for _, stmt := range statements { // 循环执行所有语句
 		stmt.Accept(v)
-		if v.returnValue != nil {
+		if v.returnValue != nil { // 执行了 return 语句结束
 			return v.returnValue
 		}
 	}
@@ -103,7 +103,7 @@ func (v *ExprVisitor) VisitVarStatement(ctx *ast.VarStatementContext) interface{
 	name := ctx.IDENTIFIER().GetText()
 	expr := ctx.Expression()
 	result := v.Visit(expr)
-	v.scope[name] = result
+	v.scope[name] = result // 定义+赋值语句
 	return result
 }
 
@@ -111,12 +111,12 @@ func (v *ExprVisitor) VisitAssignStatement(ctx *ast.AssignStatementContext) inte
 	name := ctx.IDENTIFIER().GetText()
 	expr := ctx.Expression()
 	result := v.Visit(expr)
-	v.scope[name] = result
+	v.scope[name] = result // 赋值语句
 	return result
 }
 
 func (v *ExprVisitor) VisitReturnStatement(ctx *ast.ReturnStatementContext) interface{} {
-	v.returnValue = v.Visit(ctx.Expression())
+	v.returnValue = v.Visit(ctx.Expression()) // return 语句，注意保留 return 值
 	return v.returnValue
 }
 
@@ -127,7 +127,7 @@ func (v *ExprVisitor) VisitBlockStatement(ctx *ast.BlockStatementContext) interf
 		if v.returnValue != nil {
 			return v.returnValue
 		}
-		if v.breakFlag || v.continueFlag {
+		if v.breakFlag || v.continueFlag { // 不管是发生了 break 还是 continue 下面的都不再执行了
 			return nil
 		}
 	}
@@ -136,10 +136,10 @@ func (v *ExprVisitor) VisitBlockStatement(ctx *ast.BlockStatementContext) interf
 
 func (v *ExprVisitor) VisitIfStatement(ctx *ast.IfStatementContext) interface{} {
 	condVal := v.Visit(ctx.GetCond())
-	if v.toBool(condVal) {
+	if v.toBool(condVal) { // if
 		return ctx.GetIfBody().Accept(v)
 	}
-	if elseBody := ctx.GetElseBody(); elseBody != nil {
+	if elseBody := ctx.GetElseBody(); elseBody != nil { // else
 		return elseBody.Accept(v)
 	}
 	return nil
@@ -151,10 +151,6 @@ func (v *ExprVisitor) VisitForStatement(ctx *ast.ForStatementContext) interface{
 		init.Accept(v)
 	}
 	for {
-		if v.breakFlag {
-			v.breakFlag = false
-			break
-		}
 		// 检查 cond（cond 是 statement，可能是 expression; 或 ;）
 		if cond := ctx.GetCond(); cond != nil {
 			if exprStmt := cond.ExpresstionStatement(); exprStmt != nil {
@@ -165,6 +161,8 @@ func (v *ExprVisitor) VisitForStatement(ctx *ast.ForStatementContext) interface{
 			}
 		}
 		// 执行 body
+		v.breakFlag = false
+		v.continueFlag = false
 		ctx.GetBody().Accept(v)
 		if v.returnValue != nil {
 			return v.returnValue
@@ -172,9 +170,6 @@ func (v *ExprVisitor) VisitForStatement(ctx *ast.ForStatementContext) interface{
 		if v.breakFlag {
 			v.breakFlag = false
 			break
-		}
-		if v.continueFlag {
-			v.continueFlag = false
 		}
 		// 执行 step
 		if step := ctx.GetStep(); step != nil {
@@ -210,6 +205,7 @@ func (v *ExprVisitor) VisitEq(ctx *ast.EqContext) interface{} {
 	return v.binaryOp(left, right, ctx.GetOp().GetTokenType())
 }
 
+// 统一处理二目运算符
 func (v *ExprVisitor) binaryOp(left interface{}, right interface{}, tk int) interface{} {
 	switch tk {
 	case ast.ExprLexerEQ:
@@ -285,7 +281,7 @@ func (v *ExprVisitor) callFunction(fn *functionDef, args []any) interface{} {
 	v.returnValue = nil
 	defer func() { v.returnValue = oldReturn }()
 
-	for i, name := range fn.params {
+	for i, name := range fn.params { // 设置好入参调用函数
 		v.scope[name] = args[i]
 	}
 	return v.Visit(fn.body)
@@ -314,7 +310,7 @@ func (v *ExprVisitor) VisitIdent(ctx *ast.IdentContext) interface{} {
 func (v *ExprVisitor) VisitFunInUnary(ctx *ast.FunInUnaryContext) interface{} {
 	return &functionDef{
 		params: ctx.Params().Accept(v).([]string),
-		body:   ctx.BlockStatement(),
+		body:   ctx.BlockStatement(), // 保留该 ast_tree 函数被调用时进行执行
 	}
 }
 
@@ -325,7 +321,7 @@ func (v *ExprVisitor) VisitGroup(ctx *ast.GroupContext) interface{} {
 
 func (v *ExprVisitor) VisitParams(ctx *ast.ParamsContext) interface{} {
 	res := make([]string, 0)
-	for _, tmp := range ctx.AllIDENTIFIER() {
+	for _, tmp := range ctx.AllIDENTIFIER() { // 获取形参
 		res = append(res, tmp.GetText())
 	}
 	return res
@@ -333,7 +329,7 @@ func (v *ExprVisitor) VisitParams(ctx *ast.ParamsContext) interface{} {
 
 func (v *ExprVisitor) VisitArguments(ctx *ast.ArgumentsContext) interface{} {
 	res := make([]any, 0)
-	for _, tmp := range ctx.AllExpression() {
+	for _, tmp := range ctx.AllExpression() { // 计算所有入参的值
 		res = append(res, tmp.Accept(v))
 	}
 	return res
