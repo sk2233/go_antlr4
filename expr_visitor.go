@@ -15,7 +15,7 @@ type functionDef struct {
 }
 
 type ExprVisitor struct {
-	ast.BaseExprVisitor
+	*ast.BaseExprVisitor
 	// 符号表：变量名 -> 值（含函数）
 	scope map[string]interface{}
 	// 返回值（用于 return 语句）
@@ -27,7 +27,8 @@ type ExprVisitor struct {
 
 func NewExprVisitor() *ExprVisitor {
 	return &ExprVisitor{
-		scope: make(map[string]interface{}),
+		BaseExprVisitor: &ast.BaseExprVisitor{},
+		scope:           make(map[string]interface{}),
 	}
 }
 
@@ -36,15 +37,23 @@ func (v *ExprVisitor) Visit(tree antlr.ParseTree) interface{} {
 	return tree.Accept(v)
 }
 
-// toFloat 将值转换为 float64
-func (v *ExprVisitor) toFloat(val interface{}) (float64, bool) {
+// VisitChildren 覆盖默认实现（默认返回 nil），实际遍历子节点并返回最后一个结果
+func (v *ExprVisitor) VisitChildren(node antlr.RuleNode) interface{} {
+	ctx := node.(antlr.ParserRuleContext)
+	var result interface{}
+	for i := 0; i < ctx.GetChildCount(); i++ {
+		result = ctx.GetChild(i).(antlr.ParseTree).Accept(v)
+	}
+	return result
+}
+
+// toInt 将值转换为 int
+func (v *ExprVisitor) toInt(val interface{}) (int, bool) {
 	switch x := val.(type) {
-	case float64:
-		return x, true
 	case int:
-		return float64(x), true
+		return x, true
 	case int64:
-		return float64(x), true
+		return int(x), true
 	default:
 		return 0, false
 	}
@@ -58,8 +67,8 @@ func (v *ExprVisitor) toBool(val interface{}) bool {
 	if b, ok := val.(bool); ok {
 		return b
 	}
-	if f, ok := v.toFloat(val); ok {
-		return f != 0
+	if i, ok := v.toInt(val); ok {
+		return i != 0
 	}
 	return true
 }
@@ -202,14 +211,14 @@ func (v *ExprVisitor) VisitEq(ctx *ast.EqContext) interface{} {
 	left := v.Visit(leftExpr)
 	right := v.Visit(rightExpr)
 	op := ctx.GetOp().GetText()
-	leftF, leftOk := v.toFloat(left)
-	rightF, rightOk := v.toFloat(right)
+	leftI, leftOk := v.toInt(left)
+	rightI, rightOk := v.toInt(right)
 	if leftOk && rightOk {
 		switch op {
 		case "==":
-			return leftF == rightF
+			return leftI == rightI
 		case "!=":
-			return leftF != rightF
+			return leftI != rightI
 		}
 	}
 	// 其他类型比较
@@ -240,16 +249,16 @@ func (v *ExprVisitor) VisitAdd(ctx *ast.AddContext) interface{} {
 	}
 	left := v.Visit(leftExpr)
 	right := v.Visit(rightExpr)
-	leftF, leftOk := v.toFloat(left)
-	rightF, rightOk := v.toFloat(right)
+	leftI, leftOk := v.toInt(left)
+	rightI, rightOk := v.toInt(right)
 	if !leftOk || !rightOk {
 		panic(fmt.Sprintf("invalid operands for +/-: %v, %v", left, right))
 	}
 	switch ctx.GetOp().GetText() {
 	case "+":
-		return leftF + rightF
+		return leftI + rightI
 	case "-":
-		return leftF - rightF
+		return leftI - rightI
 	}
 	return 0
 }
@@ -271,19 +280,19 @@ func (v *ExprVisitor) VisitMul(ctx *ast.MulContext) interface{} {
 	}
 	left := v.Visit(leftExpr)
 	right := v.Visit(rightExpr)
-	leftF, leftOk := v.toFloat(left)
-	rightF, rightOk := v.toFloat(right)
+	leftI, leftOk := v.toInt(left)
+	rightI, rightOk := v.toInt(right)
 	if !leftOk || !rightOk {
 		panic(fmt.Sprintf("invalid operands for *//: %v, %v", left, right))
 	}
 	switch ctx.GetOp().GetText() {
 	case "*":
-		return leftF * rightF
+		return leftI * rightI
 	case "/":
-		if rightF == 0 {
+		if rightI == 0 {
 			panic("division by zero")
 		}
-		return leftF / rightF
+		return leftI / rightI
 	}
 	return 0
 }
@@ -327,8 +336,8 @@ func (v *ExprVisitor) VisitUnaryExpr(ctx *ast.UnaryExprContext) interface{} {
 
 func (v *ExprVisitor) VisitNumber(ctx *ast.NumberContext) interface{} {
 	text := ctx.NUMBER().GetText()
-	if f, err := strconv.ParseFloat(text, 64); err == nil {
-		return f
+	if i, err := strconv.Atoi(text); err == nil {
+		return i
 	}
 	panic(fmt.Sprintf("invalid number: %s", text))
 }

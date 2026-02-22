@@ -9,7 +9,7 @@ import (
 
 func main() {
 	// 输入内容
-	input := antlr.NewInputStream("return 3*(10+2)+24/3;")
+	input := antlr.NewInputStream("3*(10+2)+24/3;")
 	// 创建词法分析器
 	lexer := ast.NewExprLexer(input)
 	stream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
