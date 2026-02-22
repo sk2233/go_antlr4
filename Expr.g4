@@ -1,17 +1,66 @@
 grammar Expr;
 
-// 语法规则（Parser Rules）（使用小写字母）
-expr: expr op=(MUL|DIV) expr # MulDiv // # Xxx 为这个分支单独生成 VisitXxx 函数
-    | expr op=(ADD|SUB) expr # AddSub // op=xxx 相当于对对应部分起别名，会生成对应变量
-    | INT                    # Int
-    // 语法规则中的 'xxx' 会自动生成匿名的 token 枚举为 ExprLexerT__{Num} 若是需要后续使用最好显示定义
-    | '(' expr ')'           # Paren
-    ;
+// 程序由多个语句组成
+program: statement+ ;
 
-// 词法规则（Lexer Rules）（使用大写字母）
-INT: [0-9]+ ;          // 整数
-WS: [ \t\r\n]+ -> skip; // 忽略空白符
-MUL: '*';
-DIV: '/';
-ADD: '+';
-SUB: '-';
+// 语句由很多种
+statement : varStatement
+        | returnStatement
+        | blockStatement
+        | ifStatement
+        | forStatement
+        | breakStatement
+        | continueStatement
+        | expresstionStatement
+        | ';'
+        ;
+
+varStatement: 'var' IDENTIFIER '=' expression ';' ;
+returnStatement: 'return' expression ';' ;
+blockStatement: '{' statement* '}' ;
+ifStatement: 'if' '(' cond=expression ')' ifBody = blockStatement ('else' elseBody=blockStatement)? ;
+forStatement: 'for' '(' init=statement cond=statement step=expression ')' body=blockStatement;
+breakStatement: 'break' ';';
+continueStatement: 'continue' ';';
+expresstionStatement: expression ';' ;
+
+expression : additionExpression    # AddInEq
+            | left=expression op=(EQ|NEQ) right=additionExpression # Eq
+            ;
+additionExpression : multiplicationExpression                                          # MulInAdd
+                    | left = additionExpression op=(PLUS|MINUS) right = multiplicationExpression       # Add
+                    ;
+multiplicationExpression : primary                                                          # PriInMul
+                        | left = multiplicationExpression op=(MULTIPLY|DIVIDE) right = primary    # Mul
+                        ;
+// 单元或者递归的求属性、函数调用等
+primary : unary                                             # UnaryExpr
+        | left=primary '(' arguments ')'                    # CallExpr
+;
+unary
+    : NUMBER    #Number
+    | IDENTIFIER#Ident
+    | group     #Gro
+    | function  #FunInUnary
+;
+group: '(' expression ')';
+function: FUNCTION '(' params ')' blockStatement;
+params: (IDENTIFIER (',' IDENTIFIER)*)?;
+arguments: (expression (',' expression)* ','?)?;
+
+FUNCTION: 'function';
+PLUS: '+';
+MINUS: '-';
+EQ: '==';
+MULTIPLY: '*';
+DIVIDE: '/';
+NEQ: '!=';
+
+NUMBER: [0-9]+('.' [0-9]+)? ;
+IDENTIFIER: [a-zA-Z_][a-zA-Z_0-9]* ;
+
+EMPTY: [\t\r\n ]+ -> skip;
+// 单行注释
+LINE_COMMENT: '//' ~[\r\n]* -> skip ;
+// 多行注释
+BLOCK_COMMENT: '/*' .*? '*/' -> skip ;

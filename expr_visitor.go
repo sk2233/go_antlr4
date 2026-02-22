@@ -2,13 +2,11 @@ package main
 
 import (
 	"ANTLR_test/ast"
-	"fmt"
 	"github.com/antlr4-go/antlr/v4"
-	"strconv"
 )
 
 type ExprVisitor struct {
-	ast.BaseExprVisitor // 持有默认实现，定制化的覆盖默认实现即可
+	ast.ExprVisitor // 持有默认实现，定制化的覆盖默认实现即可
 }
 
 func NewExprVisitor() *ExprVisitor {
@@ -20,36 +18,106 @@ func (v *ExprVisitor) Visit(tree antlr.ParseTree) interface{} {
 	return tree.Accept(v)
 }
 
-func (v *ExprVisitor) visitBinaryOp(tmp1 ast.IExprContext, tmp2 ast.IExprContext, op antlr.Token) interface{} {
-	val1 := tmp1.Accept(v).(*Var)
-	val2 := tmp2.Accept(v).(*Var)
-	switch op.GetTokenType() {
-	case ast.ExprLexerMUL:
-		return NewIntVar(val1.Int * val2.Int)
-	case ast.ExprLexerDIV:
-		return NewIntVar(val1.Int / val2.Int)
-	case ast.ExprLexerADD:
-		return NewIntVar(val1.Int + val2.Int)
-	case ast.ExprLexerSUB:
-		return NewIntVar(val1.Int - val2.Int)
-	default:
-		panic(fmt.Sprintf("unknow op %s", op.GetText()))
-	}
+func (v *ExprVisitor) VisitProgram(ctx *ast.ProgramContext) interface{} {
+	return v.VisitChildren(ctx)
 }
 
-func (v *ExprVisitor) VisitMulDiv(ctx *ast.MulDivContext) interface{} {
-	return v.visitBinaryOp(ctx.Expr(0), ctx.Expr(1), ctx.GetOp())
+func (v *ExprVisitor) VisitStatement(ctx *ast.StatementContext) interface{} {
+	return v.VisitChildren(ctx)
 }
 
-func (v *ExprVisitor) VisitAddSub(ctx *ast.AddSubContext) interface{} {
-	return v.visitBinaryOp(ctx.Expr(0), ctx.Expr(1), ctx.GetOp())
+func (v *ExprVisitor) VisitVarStatement(ctx *ast.VarStatementContext) interface{} {
+	return v.VisitChildren(ctx)
 }
 
-func (v *ExprVisitor) VisitInt(ctx *ast.IntContext) interface{} {
-	val, _ := strconv.ParseInt(ctx.INT().GetText(), 10, 64)
-	return NewIntVar(int(val))
+func (v *ExprVisitor) VisitReturnStatement(ctx *ast.ReturnStatementContext) interface{} {
+	return v.VisitChildren(ctx)
 }
 
-func (v *ExprVisitor) VisitParen(ctx *ast.ParenContext) interface{} {
-	return ctx.Expr().Accept(v)
+func (v *ExprVisitor) VisitBlockStatement(ctx *ast.BlockStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitIfStatement(ctx *ast.IfStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitForStatement(ctx *ast.ForStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitBreakStatement(ctx *ast.BreakStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitContinueStatement(ctx *ast.ContinueStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitExpresstionStatement(ctx *ast.ExpresstionStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitEq(ctx *ast.EqContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitAddInEq(ctx *ast.AddInEqContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitAdd(ctx *ast.AddContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitMulInAdd(ctx *ast.MulInAddContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitPriInMul(ctx *ast.PriInMulContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitMul(ctx *ast.MulContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitCallExpr(ctx *ast.CallExprContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitUnaryExpr(ctx *ast.UnaryExprContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitNumber(ctx *ast.NumberContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitIdent(ctx *ast.IdentContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitGro(ctx *ast.GroContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitFunInUnary(ctx *ast.FunInUnaryContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitGroup(ctx *ast.GroupContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitFunction(ctx *ast.FunctionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitParams(ctx *ast.ParamsContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *ExprVisitor) VisitArguments(ctx *ast.ArgumentsContext) interface{} {
+	return v.VisitChildren(ctx)
 }

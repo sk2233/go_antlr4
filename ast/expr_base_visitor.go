@@ -7,18 +7,106 @@ type BaseExprVisitor struct {
 	*antlr.BaseParseTreeVisitor
 }
 
-func (v *BaseExprVisitor) VisitMulDiv(ctx *MulDivContext) interface{} {
+func (v *BaseExprVisitor) VisitProgram(ctx *ProgramContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseExprVisitor) VisitAddSub(ctx *AddSubContext) interface{} {
+func (v *BaseExprVisitor) VisitStatement(ctx *StatementContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseExprVisitor) VisitInt(ctx *IntContext) interface{} {
+func (v *BaseExprVisitor) VisitVarStatement(ctx *VarStatementContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseExprVisitor) VisitParen(ctx *ParenContext) interface{} {
+func (v *BaseExprVisitor) VisitReturnStatement(ctx *ReturnStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitBlockStatement(ctx *BlockStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitIfStatement(ctx *IfStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitForStatement(ctx *ForStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitBreakStatement(ctx *BreakStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitContinueStatement(ctx *ContinueStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitExpresstionStatement(ctx *ExpresstionStatementContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitEq(ctx *EqContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitAddInEq(ctx *AddInEqContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitAdd(ctx *AddContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitMulInAdd(ctx *MulInAddContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitPriInMul(ctx *PriInMulContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitMul(ctx *MulContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitCallExpr(ctx *CallExprContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitUnaryExpr(ctx *UnaryExprContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitNumber(ctx *NumberContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitIdent(ctx *IdentContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitGro(ctx *GroContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitFunInUnary(ctx *FunInUnaryContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitGroup(ctx *GroupContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitFunction(ctx *FunctionContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitParams(ctx *ParamsContext) interface{} {
+	return v.VisitChildren(ctx)
+}
+
+func (v *BaseExprVisitor) VisitArguments(ctx *ArgumentsContext) interface{} {
 	return v.VisitChildren(ctx)
 }
