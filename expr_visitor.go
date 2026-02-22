@@ -38,11 +38,10 @@ func (v *ExprVisitor) Visit(tree antlr.ParseTree) interface{} {
 }
 
 // VisitChildren 覆盖默认实现（默认返回 nil），实际遍历子节点并返回最后一个结果
-func (v *ExprVisitor) VisitChildren(node antlr.RuleNode) interface{} {
-	ctx := node.(antlr.ParserRuleContext)
+func (v *ExprVisitor) VisitChildren(ctx antlr.RuleNode) interface{} {
 	var result interface{}
-	for i := 0; i < ctx.GetChildCount(); i++ {
-		result = ctx.GetChild(i).(antlr.ParseTree).Accept(v)
+	for _, tmp := range ctx.GetChildren() {
+		result = tmp.(antlr.ParseTree).Accept(v)
 	}
 	return result
 }
