@@ -1,4 +1,4 @@
-// Code generated from /Users/sky/Documents/go/ANTLR_test/Expr.g4 by ANTLR 4.13.2. DO NOT EDIT.
+// Code generated from /Users/wepie/Documents/github/go_antlr4/Expr.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
 package ast // Expr
 import "github.com/antlr4-go/antlr/v4"
@@ -87,19 +87,11 @@ func (v *BaseExprVisitor) VisitIdent(ctx *IdentContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseExprVisitor) VisitGro(ctx *GroContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
-func (v *BaseExprVisitor) VisitFunInUnary(ctx *FunInUnaryContext) interface{} {
-	return v.VisitChildren(ctx)
-}
-
 func (v *BaseExprVisitor) VisitGroup(ctx *GroupContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 
-func (v *BaseExprVisitor) VisitFunction(ctx *FunctionContext) interface{} {
+func (v *BaseExprVisitor) VisitFunInUnary(ctx *FunInUnaryContext) interface{} {
 	return v.VisitChildren(ctx)
 }
 

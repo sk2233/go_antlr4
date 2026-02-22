@@ -24,9 +24,9 @@ IDENTIFIER=23
 EMPTY=24
 LINE_COMMENT=25
 BLOCK_COMMENT=26
-';'=1
-'var'=2
-'='=3
+'var'=1
+'='=2
+';'=3
 'return'=4
 '{'=5
 '}'=6

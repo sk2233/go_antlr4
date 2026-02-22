@@ -77,19 +77,39 @@ func (v *ExprVisitor) VisitProgram(ctx *ast.ProgramContext) interface{} {
 }
 
 func (v *ExprVisitor) VisitStatement(ctx *ast.StatementContext) interface{} {
-	return v.VisitChildren(ctx)
+	for _, tmp := range ctx.GetChildren() {
+		switch tar := tmp.(type) {
+		case *ast.VarStatementContext:
+			return v.VisitVarStatement(tar)
+		case *ast.ReturnStatementContext:
+			return v.VisitReturnStatement(tar)
+		case *ast.BlockStatementContext:
+			return v.VisitBlockStatement(tar)
+		case *ast.IfStatementContext:
+			return v.VisitIfStatement(tar)
+		case *ast.ForStatementContext:
+			return v.VisitForStatement(tar)
+		case *ast.BreakStatementContext:
+			return v.VisitBreakStatement(tar)
+		case *ast.ContinueStatementContext:
+			return v.VisitContinueStatement(tar)
+		case *ast.ExpresstionStatementContext:
+			return v.VisitExpresstionStatement(tar)
+		}
+	}
+	panic("invalid statement")
 }
 
 func (v *ExprVisitor) VisitVarStatement(ctx *ast.VarStatementContext) interface{} {
 	name := ctx.IDENTIFIER().GetText()
 	expr := ctx.Expression()
-	result := v.Visit(expr.(antlr.ParseTree))
+	result := v.Visit(expr)
 	v.scope[name] = result
 	return result
 }
 
 func (v *ExprVisitor) VisitReturnStatement(ctx *ast.ReturnStatementContext) interface{} {
-	v.returnValue = v.Visit(ctx.Expression().(antlr.ParseTree))
+	v.returnValue = v.Visit(ctx.Expression())
 	return v.returnValue
 }
 
@@ -97,7 +117,7 @@ func (v *ExprVisitor) VisitBlockStatement(ctx *ast.BlockStatementContext) interf
 	statements := ctx.AllStatement()
 	var lastResult interface{}
 	for _, stmt := range statements {
-		lastResult = stmt.(antlr.ParseTree).Accept(v)
+		lastResult = stmt.Accept(v)
 		if v.returnValue != nil {
 			return lastResult
 		}
@@ -109,7 +129,7 @@ func (v *ExprVisitor) VisitBlockStatement(ctx *ast.BlockStatementContext) interf
 }
 
 func (v *ExprVisitor) VisitIfStatement(ctx *ast.IfStatementContext) interface{} {
-	condVal := v.Visit(ctx.GetCond().(antlr.ParseTree))
+	condVal := v.Visit(ctx.GetCond())
 	if v.toBool(condVal) {
 		return ctx.GetIfBody().Accept(v)
 	}
@@ -132,7 +152,7 @@ func (v *ExprVisitor) VisitForStatement(ctx *ast.ForStatementContext) interface{
 		// 检查 cond（cond 是 statement，可能是 expression; 或 ;）
 		if cond := ctx.GetCond(); cond != nil {
 			if exprStmt := cond.ExpresstionStatement(); exprStmt != nil {
-				condVal := v.Visit(exprStmt.Expression().(antlr.ParseTree))
+				condVal := v.Visit(exprStmt.Expression())
 				if !v.toBool(condVal) {
 					break
 				}
@@ -169,7 +189,7 @@ func (v *ExprVisitor) VisitContinueStatement(ctx *ast.ContinueStatementContext) 
 }
 
 func (v *ExprVisitor) VisitExpresstionStatement(ctx *ast.ExpresstionStatementContext) interface{} {
-	return ctx.Expression().(antlr.ParseTree).Accept(v)
+	return ctx.Expression().Accept(v)
 }
 
 // 表达式求值：== 或 !=
@@ -179,8 +199,8 @@ func (v *ExprVisitor) VisitEq(ctx *ast.EqContext) interface{} {
 	if leftExpr == nil || rightExpr == nil {
 		return v.VisitChildren(ctx)
 	}
-	left := v.Visit(leftExpr.(antlr.ParseTree))
-	right := v.Visit(rightExpr.(antlr.ParseTree))
+	left := v.Visit(leftExpr)
+	right := v.Visit(rightExpr)
 	op := ctx.GetOp().GetText()
 	leftF, leftOk := v.toFloat(left)
 	rightF, rightOk := v.toFloat(right)
@@ -205,7 +225,7 @@ func (v *ExprVisitor) VisitEq(ctx *ast.EqContext) interface{} {
 func (v *ExprVisitor) VisitAddInEq(ctx *ast.AddInEqContext) interface{} {
 	addExpr := ctx.AdditionExpression()
 	if addExpr != nil {
-		return v.Visit(addExpr.(antlr.ParseTree))
+		return v.Visit(addExpr)
 	}
 	return v.VisitChildren(ctx)
 }
@@ -218,8 +238,8 @@ func (v *ExprVisitor) VisitAdd(ctx *ast.AddContext) interface{} {
 	if leftExpr == nil || rightExpr == nil {
 		return v.VisitChildren(ctx)
 	}
-	left := v.Visit(leftExpr.(antlr.ParseTree))
-	right := v.Visit(rightExpr.(antlr.ParseTree))
+	left := v.Visit(leftExpr)
+	right := v.Visit(rightExpr)
 	leftF, leftOk := v.toFloat(left)
 	rightF, rightOk := v.toFloat(right)
 	if !leftOk || !rightOk {
@@ -249,8 +269,8 @@ func (v *ExprVisitor) VisitMul(ctx *ast.MulContext) interface{} {
 	if leftExpr == nil || rightExpr == nil {
 		return v.VisitChildren(ctx)
 	}
-	left := v.Visit(leftExpr.(antlr.ParseTree))
-	right := v.Visit(rightExpr.(antlr.ParseTree))
+	left := v.Visit(leftExpr)
+	right := v.Visit(rightExpr)
 	leftF, leftOk := v.toFloat(left)
 	rightF, rightOk := v.toFloat(right)
 	if !leftOk || !rightOk {
@@ -271,7 +291,7 @@ func (v *ExprVisitor) VisitMul(ctx *ast.MulContext) interface{} {
 // 函数调用
 func (v *ExprVisitor) VisitCallExpr(ctx *ast.CallExprContext) interface{} {
 	// left 是函数（Ident 解析为变量，变量值可能是 functionDef）
-	callable := v.Visit(ctx.GetLeft().(antlr.ParseTree))
+	callable := v.Visit(ctx.GetLeft())
 	if fn, ok := callable.(*functionDef); ok {
 		return v.callFunction(fn, ctx.Arguments())
 	}
@@ -290,7 +310,7 @@ func (v *ExprVisitor) callFunction(fn *functionDef, argsCtx ast.IArgumentsContex
 	argValues := []interface{}{}
 	if argsCtx != nil {
 		for _, expr := range argsCtx.AllExpression() {
-			argValues = append(argValues, v.Visit(expr.(antlr.ParseTree)))
+			argValues = append(argValues, v.Visit(expr))
 		}
 	}
 	for i, name := range fn.params {
@@ -321,14 +341,6 @@ func (v *ExprVisitor) VisitIdent(ctx *ast.IdentContext) interface{} {
 	panic(fmt.Sprintf("undefined variable: %s", name))
 }
 
-func (v *ExprVisitor) VisitGro(ctx *ast.GroContext) interface{} {
-	// group: '(' expression ')'，委托给 Group 的表达式求值
-	if g := ctx.Group(); g != nil && g.Expression() != nil {
-		return v.Visit(g.Expression().(antlr.ParseTree))
-	}
-	return v.VisitChildren(ctx)
-}
-
 func (v *ExprVisitor) VisitFunInUnary(ctx *ast.FunInUnaryContext) interface{} {
 	return v.VisitChildren(ctx)
 }
@@ -336,23 +348,9 @@ func (v *ExprVisitor) VisitFunInUnary(ctx *ast.FunInUnaryContext) interface{} {
 func (v *ExprVisitor) VisitGroup(ctx *ast.GroupContext) interface{} {
 	// group: '(' expression ')'，返回表达式结果
 	if expr := ctx.Expression(); expr != nil {
-		return v.Visit(expr.(antlr.ParseTree))
+		return v.Visit(expr)
 	}
 	return v.VisitChildren(ctx)
-}
-
-// 函数定义：function(params) { body }
-func (v *ExprVisitor) VisitFunction(ctx *ast.FunctionContext) interface{} {
-	paramsCtx := ctx.Params()
-	params := []string{}
-	if paramsCtx != nil {
-		for _, id := range paramsCtx.AllIDENTIFIER() {
-			params = append(params, id.GetText())
-		}
-	}
-	body := ctx.BlockStatement()
-	// 函数需要被赋值给变量后才能调用，这里返回函数对象
-	return &functionDef{params: params, body: body}
 }
 
 func (v *ExprVisitor) VisitParams(ctx *ast.ParamsContext) interface{} {

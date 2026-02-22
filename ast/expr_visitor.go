@@ -1,4 +1,4 @@
-// Code generated from /Users/sky/Documents/go/ANTLR_test/Expr.g4 by ANTLR 4.13.2. DO NOT EDIT.
+// Code generated from /Users/wepie/Documents/github/go_antlr4/Expr.g4 by ANTLR 4.13.2. DO NOT EDIT.
 
 package ast // Expr
 import "github.com/antlr4-go/antlr/v4"
@@ -67,17 +67,11 @@ type ExprVisitor interface {
 	// Visit a parse tree produced by ExprParser#Ident.
 	VisitIdent(ctx *IdentContext) interface{}
 
-	// Visit a parse tree produced by ExprParser#Gro.
-	VisitGro(ctx *GroContext) interface{}
+	// Visit a parse tree produced by ExprParser#Group.
+	VisitGroup(ctx *GroupContext) interface{}
 
 	// Visit a parse tree produced by ExprParser#FunInUnary.
 	VisitFunInUnary(ctx *FunInUnaryContext) interface{}
-
-	// Visit a parse tree produced by ExprParser#group.
-	VisitGroup(ctx *GroupContext) interface{}
-
-	// Visit a parse tree produced by ExprParser#function.
-	VisitFunction(ctx *FunctionContext) interface{}
 
 	// Visit a parse tree produced by ExprParser#params.
 	VisitParams(ctx *ParamsContext) interface{}

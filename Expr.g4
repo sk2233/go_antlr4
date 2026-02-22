@@ -12,7 +12,6 @@ statement : varStatement
         | breakStatement
         | continueStatement
         | expresstionStatement
-        | ';'
         ;
 
 varStatement: 'var' IDENTIFIER '=' expression ';' ;
@@ -38,13 +37,11 @@ primary : unary                                             # UnaryExpr
         | left=primary '(' arguments ')'                    # CallExpr
 ;
 unary
-    : NUMBER    #Number
-    | IDENTIFIER#Ident
-    | group     #Gro
-    | function  #FunInUnary
+    : NUMBER     #Number
+    | IDENTIFIER #Ident
+    | '(' expression ')'     #Group
+    | FUNCTION '(' params ')' blockStatement  #FunInUnary
 ;
-group: '(' expression ')';
-function: FUNCTION '(' params ')' blockStatement;
 params: (IDENTIFIER (',' IDENTIFIER)*)?;
 arguments: (expression (',' expression)* ','?)?;
 
